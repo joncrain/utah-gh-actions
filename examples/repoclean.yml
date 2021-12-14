@@ -1,0 +1,43 @@
+name: Repo Clean
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # Monday at 8am UTC.
+  workflow_dispatch: # manually triggered
+
+jobs:
+  repoclean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@25a956c84d5dd820d28caab9f86b8d183aeeff3d
+
+      - name: Checkout Munki code
+        uses: actions/checkout@25a956c84d5dd820d28caab9f86b8d183aeeff3d
+        with:
+          repository: munki/munki
+          fetch-depth: 1
+          ref: e2d88c009108b84613cfd88c4a0c5a008dc5df76
+          path: munki
+
+      - name: Run Munki repoclean
+        run: |
+          yes | python3 munki/code/client/repoclean ./ > pull_request_body
+          echo "BRANCH=repoclean-$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "TITLE=feat: Repo Clean $(date +'%Y-%m-%d')" >> $GITHUB_ENV
+          echo "BODY<<EOF" >> $GITHUB_ENV
+          cat pull_request_body >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@09b9ac155b0d5ad7d8d157ed32158c1b73689109
+        with:
+          title: ${{ env.TITLE }}
+          body: ${{ env.BODY }}
+          branch: ${{ env.BRANCH }}
+          base: main
+          delete-branch: true
+          commit-message: ${{ env.TITLE }}
+          author: repo-cleaner <repo-cleaner@users.noreply.github.com>

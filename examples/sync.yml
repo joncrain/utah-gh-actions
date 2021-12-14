@@ -1,0 +1,29 @@
+# Daily runner to sync groups to MDM
+name: MDM Identity Management Sync
+
+on:
+  schedule:
+    - cron: "30 5 * * *" # At 05:30 AM (UTC)
+  workflow_dispatch: # manually triggered
+
+jobs:
+  IDP-MDM-Sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 # Keeps your builds from running too long
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@28c7f3d2b5162b5ddd3dfd9a45aa55eaf396478b # Pin SHA1 hash instead of version
+        with:
+          submodules: "true"
+
+      - name: IDP Sync
+        run: |
+          pip3 install python-dotenv
+          python3 ./mdm_group_sync.py
+        env:
+          IDP_URL: ${{ secrets.IDP_URL }}
+          IDP_TOKEN: ${{ secrets.IDP_TOKEN }}
+          MDM_API: ${{ secrets.MDM_API }}
+          MDM_URL: ${{ secrets.MDM_URL }}
+          MDM_USERNAME: ${{ secrets.MDM_USERNAME }}
+          MDM_PASSWORD: ${{ secrets.MDM_PASSWORD }}

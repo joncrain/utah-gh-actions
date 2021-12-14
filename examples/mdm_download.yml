@@ -1,0 +1,40 @@
+name: Download Profile Changes from MDM
+
+on:
+  schedule:
+    - cron: "0 3 * * 1" # At 3am UTC on Mondays.
+  workflow_dispatch: # manually triggered
+
+jobs:
+  MDM_Download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5 # Keeps your builds from running too long
+    steps:
+      - name: Checkout custom-profiles (this repo)
+        uses: actions/checkout@25a956c84d5dd820d28caab9f86b8d183aeeff3d
+
+      - name: Find and download Changes
+        run: |
+          python3 scripts/download_profiles.py
+        env:
+          MDM_KEY: ${{ secrets.MDM_KEY }}
+          BASIC_AUTH: ${{ secrets.BASIC_AUTH }}
+
+      - name: Find/Make Commit # Script still coming
+        run: |
+          echo "TITLE=$(echo "feat: Sync from MDM")" >> $GITHUB_ENV
+          echo "BODY<<EOF" >> $GITHUB_ENV
+          echo "MDM Profile changes for `date +'%Y-%m-%d'`" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create Pull Request
+        if: env.TITLE
+        uses: peter-evans/create-pull-request@09b9ac155b0d5ad7d8d157ed32158c1b73689109
+        with:
+          title: ${{ env.TITLE }}
+          body: ${{ env.BODY }}
+          branch: feat_update_profiles
+          base: main
+          delete-branch: true
+          commit-message: ${{ env.TITLE }}
+          author: profile-downloader <profile-downloader@users.noreply.github.com>

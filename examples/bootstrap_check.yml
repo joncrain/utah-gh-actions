@@ -1,0 +1,22 @@
+# Checks if resources for InstallApplications are valid
+name: Bootstrap Check
+
+on:
+  push:
+    branches-ignore:
+      - main
+
+jobs:
+  check:
+    runs-on: macos-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@25a956c84d5dd820d28caab9f86b8d183aeeff3d
+        with:
+          fetch-depth: 1
+          lfs: true
+      - name: Check bootstrap files
+        run: |
+          ./generate-all.sh
+          if [ -n "$(git status --porcelain)" ]; then echo "One or more invalid json configuration file(s)" && exit 1; else echo "No changes"; fi

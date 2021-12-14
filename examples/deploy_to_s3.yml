@@ -1,0 +1,30 @@
+# deploys the "content" director to S3
+name: S3 Deploy
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "content/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@25a956c84d5dd820d28caab9f86b8d183aeeff3d
+        with:
+          fetch-depth: 1
+          lfs: true
+      - name: S3 Sync
+        uses: jakejarvis/s3-sync-action@7ed8b112447abb09f1da74f3466e4194fc7a6311
+        with:
+          args: --exclude '.*' --delete
+        env:
+          AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: content
+          DEST_DIR: private/directory
