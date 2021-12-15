@@ -16,7 +16,7 @@ Triggers: https://docs.github.com/en/actions/reference/events-that-trigger-workf
 
 Pre-Commit Action: https://github.com/marketplace/actions/pre-commit
 
-MDOYVR20 - Elliot Jordan - Intro to Pre-Commit: https://www.youtube.com/watch?v=1UCyGC6DVOU
+MDOYVR19 - Elliot Jordan - Intro to Pre-Commit: https://www.youtube.com/watch?v=1UCyGC6DVOU
 
 Pre-Commit for Mac Admins: https://github.com/homebysix/pre-commit-macadmin
 
